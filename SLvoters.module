@@ -4,3 +4,11 @@
  * @file
  * SLvoters module installation and general hooks
  */
+use Drupal\node\NodeTypeInterface;
+
+/**
+ * Implements hook_node_type_delete().
+ */
+function SLvoters_node_type_delete(NodeTypeInterface $info) {
+  drupal_static_reset('SLvoters_get_content_types');
+}
