@@ -169,95 +169,13 @@ class Voter extends ContentEntityBase implements VoterInterface {
   /**
    * {@inheritdoc}
    */
-  public function isVoter($newsletter_id) {
-    foreach ($this->voters as $item) {
-      if ($item->target_id == $newsletter_id) {
-        return $item->status == SLvoters_STATUS_VOTER;
-      }
+  public function isVoter($voter) {
+      if ($voter->status == SLvoters_STATUS_VOTER) {
+        return TRUE;
     }
     return FALSE;
   }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function isNotVoter($newsletter_id) {
-    foreach ($this->voters as $item) {
-      if ($item->target_id == $newsletter_id) {
-        return $item->status == SLvoters_STATUS_VOTER;
-      }
-    }
-    return FALSE;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getSubscription($newsletter_id) {
-    foreach ($this->voters as $item) {
-      if ($item->target_id == $newsletter_id) {
-        return $item;
-      }
-    }
-    return FALSE;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getSubscribedNewsletterIds() {
-    $ids = array();
-    foreach ($this->voters as $item) {
-      if ($item->status == SLvoters_SUBSCRIPTION_STATUS_SUBSCRIBED) {
-        $ids[] = $item->target_id;
-      }
-    }
-    return $ids;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function subscribe($newsletter_id, $status = SLvoters_SUBSCRIPTION_STATUS_SUBSCRIBED, $source = 'unknown', $timestamp = REQUEST_TIME) {
-    if ($subscription = $this->getSubscription($newsletter_id)) {
-      $subscription->status = $status;
-    }
-    else {
-      $data = array(
-        'target_id' => $newsletter_id,
-        'status' => $status,
-        'source' => $source,
-        'timestamp' => $timestamp,
-      );
-      $this->voters->appendItem($data);
-    }
-    if ($status == SLvoters_SUBSCRIPTION_STATUS_SUBSCRIBED) {
-      \Drupal::moduleHandler()->invokeAll('SLvoters_subscribe', array($this, $newsletter_id));
-    }
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function unsubscribe($newsletter_id, $source = 'unknown', $timestamp = REQUEST_TIME) {
-    if ($subscription = $this->getSubscription($newsletter_id)) {
-      $subscription->status = SLvoters_SUBSCRIPTION_STATUS_UNSUBSCRIBED;
-    }
-    else {
-      $data = array(
-        'target_id' => $newsletter_id,
-        'status' => SLvoters_SUBSCRIPTION_STATUS_UNSUBSCRIBED,
-        'source' => $source,
-        'timestamp' => $timestamp,
-      );
-      $this->voters->appendItem($data);
-    }
-    // Clear eventually existing mail spool rows for this voter.
-    \Drupal::service('SLvoters.spool_storage')->deleteMails(array('snid' => $this->id(), 'newsletter_id' => $newsletter_id));
-
-    \Drupal::moduleHandler()->invokeAll('SLvoters_unsubscribe', array($this, $newsletter_id));
-  }
-
+  
   /**
    * {@inheritdoc}
    */
